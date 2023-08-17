@@ -15,11 +15,12 @@ func NewImplStorageProductMySQL(db *sql.DB) *ImplStorageProductMySQL {
 
 // ProductMySQL is a product model for MySQL
 type ProductMySQL struct {
-	ID		sql.NullInt32
-	Name	sql.NullString
-	Type	sql.NullString
-	Count	sql.NullInt32
-	Price	sql.NullFloat64
+	ID			sql.NullInt32
+	Name		sql.NullString
+	Type		sql.NullString
+	Count		sql.NullInt32
+	Price		sql.NullFloat64
+	WarehouseId	sql.NullInt32
 }
 
 // ImplStorageProductMySQL is an implementation of StorageProduct interface
@@ -30,7 +31,7 @@ type ImplStorageProductMySQL struct {
 // GetOne returns one product by id
 func (impl *ImplStorageProductMySQL) GetOne(id int) (p *Product, err error) {
 	// query
-	query := "SELECT id, name, type, count, price FROM products WHERE id = ?"
+	query := "SELECT id, name, type, count, price, warehouse_id FROM products WHERE id = ?"
 
 	// prepare statement
 	var stmt *sql.Stmt
@@ -57,7 +58,7 @@ func (impl *ImplStorageProductMySQL) GetOne(id int) (p *Product, err error) {
 
 	// scan row
 	var product ProductMySQL
-	err = row.Scan(&product.ID, &product.Name, &product.Type, &product.Count, &product.Price)
+	err = row.Scan(&product.ID, &product.Name, &product.Type, &product.Count, &product.Price, &product.WarehouseId)
 	if err != nil {
 		err = fmt.Errorf("%w. %v", ErrStorageProductInternal, err)
 		return
@@ -76,6 +77,9 @@ func (impl *ImplStorageProductMySQL) GetOne(id int) (p *Product, err error) {
 	}
 	if product.Price.Valid {
 		(*p).Price = product.Price.Float64
+	}
+	if product.WarehouseId.Valid {
+		(*p).WarehouseId = int(product.WarehouseId.Int32)
 	}
 
 	return
@@ -101,9 +105,13 @@ func (impl *ImplStorageProductMySQL) Store(p *Product) (err error) {
 		product.Price.Valid = true
 		product.Price.Float64 = (*p).Price
 	}
+	if (*p).WarehouseId != 0 {
+		product.WarehouseId.Valid = true
+		product.WarehouseId.Int32 = int32((*p).WarehouseId)
+	}
 
 	// query
-	query := "INSERT INTO products (name, type, count, price) VALUES (?, ?, ?, ?)"
+	query := "INSERT INTO products (name, type, count, price, warehouse_id) VALUES (?, ?, ?, ?, ?)"
 
 	// prepare statement
 	var stmt *sql.Stmt
@@ -115,12 +123,14 @@ func (impl *ImplStorageProductMySQL) Store(p *Product) (err error) {
 	defer stmt.Close()
 
 	// execute query
-	result, err := stmt.Exec(product.Name, product.Type, product.Count, product.Price)
+	result, err := stmt.Exec(product.Name, product.Type, product.Count, product.Price, product.WarehouseId)
 	if err != nil {
 		errMySQL, ok := err.(*mysql.MySQLError); if ok {
 			switch errMySQL.Number {
 			case 1062:
 				err = fmt.Errorf("%w. %v", ErrStorageProductNotUnique, err)
+			case 1452:
+				err = fmt.Errorf("%w. %v", ErrStorageProductRelation, err)
 			default:
 				err = fmt.Errorf("%w. %v", ErrStorageProductInternal, err)
 			}
@@ -176,9 +186,13 @@ func (impl *ImplStorageProductMySQL) Update(p *Product) (err error) {
 		product.Price.Valid = true
 		product.Price.Float64 = (*p).Price
 	}
+	if (*p).WarehouseId != 0 {
+		product.WarehouseId.Valid = true
+		product.WarehouseId.Int32 = int32((*p).WarehouseId)
+	}
 
 	// query
-	query := "UPDATE products SET name = ?, type = ?, count = ?, price = ? WHERE id = ?"
+	query := "UPDATE products SET name = ?, type = ?, count = ?, price = ?, warehouse_id = ? WHERE id = ?"
 
 	// prepare statement
 	var stmt *sql.Stmt
@@ -190,8 +204,21 @@ func (impl *ImplStorageProductMySQL) Update(p *Product) (err error) {
 	defer stmt.Close()
 
 	// execute query
-	result, err := stmt.Exec(product.Name, product.Type, product.Count, product.Price, (*p).ID)
+	result, err := stmt.Exec(product.Name, product.Type, product.Count, product.Price, product.WarehouseId, (*p).ID)
 	if err != nil {
+		errMySQL, ok := err.(*mysql.MySQLError); if ok {
+			switch errMySQL.Number {
+			case 1062:
+				err = fmt.Errorf("%w. %v", ErrStorageProductNotUnique, err)
+			case 1452:
+				err = fmt.Errorf("%w. %v", ErrStorageProductRelation, err)
+			default:
+				err = fmt.Errorf("%w. %v", ErrStorageProductInternal, err)
+			}
+
+			return
+		}
+
 		err = fmt.Errorf("%w. %v", ErrStorageProductInternal, err)
 		return
 	}

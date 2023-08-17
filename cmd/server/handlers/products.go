@@ -22,10 +22,11 @@ type ControllerProduct struct {
 
 // GetOne returns one product by id
 type ResponseProduct struct {
-	Name    string	`json:"name"`
-	Type	string	`json:"type"`
-	Count	int		`json:"count"`
-	Price	float64	`json:"price"`
+	Name    	string	`json:"name"`
+	Type		string	`json:"type"`
+	Count		int		`json:"count"`
+	Price		float64	`json:"price"`
+	WarehouseId int		`json:"warehouse_id"`
 }
 type ResponseBody struct {
 	Message string			 `json:"message"`
@@ -80,6 +81,7 @@ func (c *ControllerProduct) GetOne() http.HandlerFunc {
 				Type:	product.Type,
 				Count:	product.Count,
 				Price:	product.Price,
+				WarehouseId: product.WarehouseId,
 			},
 			Error: false,
 		}
@@ -90,16 +92,18 @@ func (c *ControllerProduct) GetOne() http.HandlerFunc {
 
 // Store stores product
 type RequestProductStore struct {
-	Name    string	`json:"name"`
-	Type	string	`json:"type"`
-	Count	int		`json:"count"`
-	Price	float64	`json:"price"`
+	Name    	string	`json:"name"`
+	Type		string	`json:"type"`
+	Count		int		`json:"count"`
+	Price		float64	`json:"price"`
+	WarehouseId int		`json:"warehouse_id"`
 }
 type ResponseProductStore struct {
-	Name    string	`json:"name"`
-	Type	string	`json:"type"`
-	Count	int		`json:"count"`
-	Price	float64	`json:"price"`
+	Name    	string	`json:"name"`
+	Type		string	`json:"type"`
+	Count		int		`json:"count"`
+	Price		float64	`json:"price"`
+	WarehouseId int		`json:"warehouse_id"`
 }
 type ResponseBodyStore struct {
 	Message string					`json:"message"`
@@ -126,6 +130,7 @@ func (c *ControllerProduct) Store() http.HandlerFunc {
 			Type:	req.Type,
 			Count:	req.Count,
 			Price:	req.Price,
+			WarehouseId: req.WarehouseId,
 		}
 		err = c.storage.Store(product)
 		if err != nil {
@@ -152,6 +157,7 @@ func (c *ControllerProduct) Store() http.HandlerFunc {
 				Type:	product.Type,
 				Count:	product.Count,
 				Price:	product.Price,
+				WarehouseId: product.WarehouseId,
 			},
 			Error: false,
 		}
@@ -162,16 +168,18 @@ func (c *ControllerProduct) Store() http.HandlerFunc {
 
 // Update updates product
 type RequestProductUpdate struct {
-	Name    string	`json:"name"`
-	Type	string	`json:"type"`
-	Count	int		`json:"count"`
-	Price	float64	`json:"price"`
+	Name    	string	`json:"name"`
+	Type		string	`json:"type"`
+	Count		int		`json:"count"`
+	Price		float64	`json:"price"`
+	WarehouseId int		`json:"warehouse_id"`
 }
 type ResponseProductUpdate struct {
-	Name    string	`json:"name"`
-	Type	string	`json:"type"`
-	Count	int		`json:"count"`
-	Price	float64	`json:"price"`
+	Name    	string	`json:"name"`
+	Type		string	`json:"type"`
+	Count		int		`json:"count"`
+	Price		float64	`json:"price"`
+	WarehouseId int		`json:"warehouse_id"`
 }
 type ResponseBodyUpdate struct {
 	Message string					`json:"message"`
@@ -217,10 +225,11 @@ func (c *ControllerProduct) Update() http.HandlerFunc {
 		}
 		// -- serialization
 		product := &RequestProductUpdate{
-			Name:   pr.Name,
+			Name:	pr.Name,
 			Type:	pr.Type,
 			Count:	pr.Count,
 			Price:	pr.Price,
+			WarehouseId: pr.WarehouseId,
 		}
 
 		// -> patch product to RequestProductUpdate(filled with original data)
@@ -239,6 +248,7 @@ func (c *ControllerProduct) Update() http.HandlerFunc {
 			Type:	product.Type,
 			Count:	product.Count,
 			Price:	product.Price,
+			WarehouseId: product.WarehouseId,
 		}
 		// -- update product
 		err = c.storage.Update(prUpdate)
@@ -269,6 +279,7 @@ func (c *ControllerProduct) Update() http.HandlerFunc {
 				Type:	prUpdate.Type,
 				Count:	prUpdate.Count,
 				Price:	prUpdate.Price,
+				WarehouseId: prUpdate.WarehouseId,
 			},
 			Error: false,
 		}
@@ -322,12 +333,8 @@ func (c *ControllerProduct) Delete() http.HandlerFunc {
 		}
 
 		// response
-		code := http.StatusOK
-		body := &ResponseBodyDelete{
-			Message: "success",
-			Data:    nil,
-			Error:   false,
-		}
+		code := http.StatusNoContent
+		body := any(nil)
 
 		response.JSON(w, code, body)
 	}

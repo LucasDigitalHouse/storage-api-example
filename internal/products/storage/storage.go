@@ -4,11 +4,12 @@ import "errors"
 
 // Product is a product model
 type Product struct {
-	ID		int
-	Name    string
-	Type	string
-	Count	int
-	Price	float64
+	ID			int
+	Name    	string
+	Type		string
+	Count		int
+	Price		float64
+	WarehouseId int
 }
 
 // StorageProduct is an interface for product storage
@@ -30,4 +31,5 @@ var (
 	ErrStorageProductInternal = errors.New("internal storage product error")
 	ErrStorageProductNotFound = errors.New("storage product not found")
 	ErrStorageProductNotUnique = errors.New("storage product not unique")
+	ErrStorageProductRelation = errors.New("storage product relation error")
 )
