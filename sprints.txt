@@ -1,0 +1,34 @@
+Domains
+|_ Sprint 1 y 2
+|  |_ Seller
+|  |_ Warehouse
+|  |_ Section
+|  |_ Product
+|  |_ Employee
+|  |_ Buyer
+|
+|_ Sprint 3 y 4
+|  |_ Locality (compartido entre Seller y Warehouse)
+|  |_ ProductBatches
+|  |_ ProductRecords
+|  |_ InboundOrders
+|  |_ PurchaseOrders
+
+Utilizando gin de multiplexer en go
+```go
+r := gin.Default()
+r.GET("/ping", func(c *gin.Context) {
+    c.String(200, "pong")
+})
+
+sellerGroup := r.Group("/seller")
+{
+    sellerGroup.GET("/", handlers.GetSeller)
+    sellerGroup.GET("/:id", handlers.GetSellerById)
+    sellerGroup.POST("/", handlers.CreateSeller)
+    sellerGroup.PUT("/:id", handlers.UpdateSeller)
+    sellerGroup.DELETE("/:id", handlers.DeleteSeller)
+
+    sellerGroup.GET("/reports", handlers.GetReports)
+}
+```
