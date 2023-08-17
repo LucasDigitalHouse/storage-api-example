@@ -7,6 +7,8 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+
+	"github.com/go-chi/chi/v5"
 )
 
 // NewControllerProduct returns new ControllerProduct
@@ -35,16 +37,7 @@ type ResponseBody struct {
 func (c *ControllerProduct) GetOne() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// request
-		idParam, err := request.PathLastParam(r)
-		if err != nil {
-			code := http.StatusBadRequest
-			body := &ResponseBody{Message: "invalid path param", Data: nil, Error: true}
-
-			response.JSON(w, code, body)
-			return
-		}
-
-		id, err := strconv.Atoi(idParam)
+		id, err := strconv.Atoi(chi.URLParam(r, "id"))
 		if err != nil {
 			code := http.StatusBadRequest
 			body := &ResponseBody{Message: "parameter must be int", Data: nil, Error: true}
@@ -181,15 +174,7 @@ type ResponseBodyUpdate struct {
 func (c *ControllerProduct) Update() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// request
-		idParam, err := request.PathLastParam(r)
-		if err != nil {
-			code := http.StatusBadRequest
-			body := &ResponseBody{Message: "invalid path param", Data: nil, Error: true}
-
-			response.JSON(w, code, body)
-			return
-		}
-		id, err := strconv.Atoi(idParam)
+		id, err := strconv.Atoi(chi.URLParam(r, "id"))
 		if err != nil {
 			code := http.StatusBadRequest
 			body := &ResponseBody{Message: "parameter must be int", Data: nil, Error: true}
@@ -286,15 +271,7 @@ type ResponseBodyDelete struct {
 func (c *ControllerProduct) Delete() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// request
-		idParam, err := request.PathLastParam(r)
-		if err != nil {
-			code := http.StatusBadRequest
-			body := &ResponseBody{Message: "invalid path param", Data: nil, Error: true}
-
-			response.JSON(w, code, body)
-			return
-		}
-		id, err := strconv.Atoi(idParam)
+		id, err := strconv.Atoi(chi.URLParam(r, "id"))
 		if err != nil {
 			code := http.StatusBadRequest
 			body := &ResponseBody{Message: "parameter must be int", Data: nil, Error: true}
