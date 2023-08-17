@@ -90,6 +90,7 @@ func (c *ControllerProduct) GetOne() http.HandlerFunc {
 	}
 }
 
+
 // GetAll returns all products
 type ResponseProductGetAll struct {
 	Name    	string	`json:"name"`
@@ -135,6 +136,7 @@ func (c *ControllerProduct) GetAll() http.HandlerFunc {
 		response.JSON(w, code, body)
 	}
 }
+
 
 // GetOneWithWarehouse returns one product by id with warehouse info
 type ResponseProductGetOneWithWarehouse struct {
@@ -285,6 +287,7 @@ func (c *ControllerProduct) Store() http.HandlerFunc {
 	}
 }
 
+
 // Update updates product
 type RequestProductUpdate struct {
 	Name    	string	`json:"name"`
@@ -406,6 +409,7 @@ func (c *ControllerProduct) Update() http.HandlerFunc {
 		response.JSON(w, code, body)
 	}
 }
+
 
 // Delete deletes product by id
 type ResponseBodyDelete struct {
