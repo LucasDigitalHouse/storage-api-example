@@ -61,6 +61,8 @@ func (a *Application) Run() (err error) {
 	// routes
 	// -> products
 	r.Get("/products/{id}", ctProducts.GetOne())
+	r.Get("/products", ctProducts.GetAll())
+	r.Get("/products/warehouse/{id}", ctProducts.GetOneWithWarehouse())
 	r.Post("/products", ctProducts.Store())
 	r.Put("/products/{id}", ctProducts.Update())
 	r.Delete("/products/{id}", ctProducts.Delete())

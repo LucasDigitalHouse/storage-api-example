@@ -90,6 +90,125 @@ func (c *ControllerProduct) GetOne() http.HandlerFunc {
 	}
 }
 
+// GetAll returns all products
+type ResponseProductGetAll struct {
+	Name    	string	`json:"name"`
+	Type		string	`json:"type"`
+	Count		int		`json:"count"`
+	Price		float64	`json:"price"`
+	WarehouseId int		`json:"warehouse_id"`
+}
+type ResponseBodyGetAll struct {
+	Message string					 `json:"message"`
+	Data    []*ResponseProductGetAll `json:"data"`
+	Error   bool					 `json:"error"`
+}
+func (c *ControllerProduct) GetAll() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// request
+		// ...
+
+		// process
+		products, err := c.storage.GetAll()
+		if err != nil {
+			code := http.StatusInternalServerError
+			body := &ResponseBody{Message: "internal error", Data: nil, Error: true}
+
+			response.JSON(w, code, body)
+			return
+		}
+
+		// response
+		// -> serialization
+		code := http.StatusOK
+		body := make([]*ResponseProductGetAll, 0, len(products))
+		for _, product := range products {
+			body = append(body, &ResponseProductGetAll{
+				Name:   product.Name,
+				Type:	product.Type,
+				Count:	product.Count,
+				Price:	product.Price,
+				WarehouseId: product.WarehouseId,
+			})
+		}
+
+		response.JSON(w, code, body)
+	}
+}
+
+// GetOneWithWarehouse returns one product by id with warehouse info
+type ResponseProductGetOneWithWarehouse struct {
+	// Product
+	Name    	string	`json:"name"`
+	Type		string	`json:"type"`
+	Count		int		`json:"count"`
+	Price		float64	`json:"price"`
+	// Warehouse Attributes
+	WarehouseName    string	`json:"warehouse_name"`
+	WarehouseAddress string	`json:"warehouse_address"`
+}
+type ResponseBodyGetOneWithWarehouse struct {
+	Message string								`json:"message"`
+	Data    *ResponseProductGetOneWithWarehouse	`json:"data"`
+	Error   bool								`json:"error"`
+}
+func (c *ControllerProduct) GetOneWithWarehouse() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// request
+		idParam, err := request.PathLastParam(r)
+		if err != nil {
+			code := http.StatusBadRequest
+			body := &ResponseBody{Message: "invalid path param", Data: nil, Error: true}
+
+			response.JSON(w, code, body)
+			return
+		}
+		id, err := strconv.Atoi(idParam)
+		if err != nil {
+			code := http.StatusBadRequest
+			body := &ResponseBody{Message: "parameter must be int", Data: nil, Error: true}
+
+			response.JSON(w, code, body)
+			return
+		}
+
+		// process
+		product, err := c.storage.GetOneWithWarehouse(id)
+		if err != nil {
+			var code int; var body *ResponseBody
+			switch {
+			case errors.Is(err, storage.ErrStorageProductNotFound):
+				code = http.StatusNotFound
+				body = &ResponseBody{Message: "product not found", Data: nil, Error: true}
+			default:
+				code = http.StatusInternalServerError
+				body = &ResponseBody{Message: "internal error", Data: nil, Error: true}
+			}
+
+			response.JSON(w, code, body)
+			return
+		}
+
+		// response
+		code := http.StatusOK
+		body := &ResponseBodyGetOneWithWarehouse{
+			Message: "success",
+			Data: &ResponseProductGetOneWithWarehouse{	// serialization
+				Name:   product.Name,
+				Type:	product.Type,
+				Count:	product.Count,
+				Price:	product.Price,
+				WarehouseName: product.WarehouseAttr.Name,
+				WarehouseAddress: product.WarehouseAttr.Address,
+			},
+			Error: false,
+		}
+
+		response.JSON(w, code, body)
+	}
+}
+
+
 // Store stores product
 type RequestProductStore struct {
 	Name    	string	`json:"name"`

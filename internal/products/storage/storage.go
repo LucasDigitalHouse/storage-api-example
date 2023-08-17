@@ -1,6 +1,9 @@
 package storage
 
-import "errors"
+import (
+	storageWh "app/internal/warehouse/storage"
+	"errors"
+)
 
 // Product is a product model
 type Product struct {
@@ -12,10 +15,27 @@ type Product struct {
 	WarehouseId int
 }
 
+type ProductWarehouse struct {
+	// Product
+	ID			int
+	Name    	string
+	Type		string
+	Count		int
+	Price		float64
+	// Warehouse Attributes
+	WarehouseAttr *storageWh.WarehouseAttributes
+}
+
 // StorageProduct is an interface for product storage
 type StorageProduct interface {
 	// GetOne returns one product by id
 	GetOne(id int) (p *Product, err error)
+
+	// GetAll returns all products
+	GetAll() (ps []*Product, err error)
+
+	// GetOneWithWarehouse returns one product by id with warehouse info
+	GetOneWithWarehouse(id int) (p *ProductWarehouse, err error)
 
 	// Store stores product
 	Store(p *Product) (err error)
