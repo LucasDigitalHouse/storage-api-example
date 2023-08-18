@@ -15,20 +15,20 @@ func TestStorageMySQL_GetAll(t *testing.T) {
 	// -> table
 	tableWarehouse := `
 		CREATE TABLE IF NOT EXISTS warehouses (
-			id INT NOT NULL AUTO_INCREMENT,
-			name VARCHAR(255) NOT NULL,
-			address VARCHAR(255) NOT NULL,
+			id int NOT NULL AUTO_INCREMENT,
+			name varchar(255) NOT NULL,
+			address varchar(255) NOT NULL,
 			PRIMARY KEY (id)
 		);
 	`
 	tableProduct := `
 		CREATE TABLE IF NOT EXISTS products (
-			id INT NOT NULL AUTO_INCREMENT,
-			name VARCHAR(255) NOT NULL,
-			type VARCHAR(255) NOT NULL,
-			count INT NOT NULL,
-			price FLOAT NOT NULL,
-			warehouse_id INT NOT NULL,
+			id int NOT NULL AUTO_INCREMENT,
+			name varchar(255) NOT NULL,
+			type varchar(255) NOT NULL,
+			count int NOT NULL,
+			price decimal(10,2) NOT NULL,
+			warehouse_id int NOT NULL,
 			PRIMARY KEY (id),
 			CONSTRAINT fk_warehouse_id FOREIGN KEY (warehouse_id) REFERENCES warehouses(id)
 		);
